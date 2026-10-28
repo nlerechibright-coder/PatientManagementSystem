@@ -11,7 +11,16 @@
             <h1 class="text-3xl font-bold text-slate-900">{{ patient.first_name }} {{ patient.last_name }}</h1>
             <p class="text-slate-500 mt-1 font-mono">ID: {{ patient.patient_id }}</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-3 flex-wrap justify-end">
+            {% if user.role == 'DOCTOR' %}
+            <form method="post" action="{% url 'appointments:open_emergency_visit' patient.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Open Emergency Visit & Consult
+                </button>
+            </form>
+            {% endif %}
             {% if user.role == 'ADMIN' or user.role == 'RECEPTIONIST' %}
             <a href="{% url 'appointments:create_appointment_for_patient' patient.pk %}" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -53,7 +62,7 @@
                         <div class="flex justify-between items-start mb-3">
                             <div>
                                 <p class="text-sm font-semibold text-slate-900">{{ visit.check_in_time|date:"F d, Y" }} at {{ visit.check_in_time|time:"h:i A" }}</p>
-                                <p class="text-xs text-slate-500">Attending: Dr. {{ visit.doctor.username }}</p>
+                                <p class="text-xs text-slate-500">Attending: Dr. {{ visit.doctor.username }}{% if not visit.appointment %} &bull; <span class="text-red-600 font-semibold">Emergency Walk-in</span>{% endif %}</p>
                             </div>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                                 {% if visit.status == 'OPEN' %}bg-green-100 text-green-800

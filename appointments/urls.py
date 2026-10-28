@@ -6,6 +6,7 @@ app_name = 'appointments'
 urlpatterns = [
     path('create/', views.create_appointment, name='create_appointment'),
     path('create/<int:patient_pk>/', views.create_appointment, name='create_appointment_for_patient'),
+    path('emergency-visit/<int:patient_pk>/', views.open_emergency_visit, name='open_emergency_visit'),
     path('<int:pk>/', views.appointment_detail, name='appointment_detail'),
     path('<int:pk>/accept/', views.accept_appointment, name='accept_appointment'),
     path('<int:pk>/reject/', views.reject_appointment, name='reject_appointment'),

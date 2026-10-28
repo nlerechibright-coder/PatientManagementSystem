@@ -76,10 +76,7 @@ def reject_appointment(request, pk):
 
 @login_required
 def start_consultation(request, pk):
-    """
-    Doctor attends to a scheduled patient IMMEDIATELY, before the scheduled time.
-    Used for emergencies or when the doctor is less busy. Bypasses receptionist check-in.
-    """
+    """Doctor attends a scheduled patient immediately, before the scheduled time."""
     if request.user.role != 'DOCTOR':
         messages.error(request, "Access denied. Only doctors can start consultations.")
         return redirect('users:dashboard')
@@ -94,12 +91,10 @@ def start_consultation(request, pk):
         messages.warning(request, "This appointment cannot be attended (it is already completed or cancelled).")
         return redirect('users:doctor_dashboard')
 
-    # If a visit already exists for this appointment, go straight to it
     existing_visit = Visit.objects.filter(appointment=appt).first()
     if existing_visit:
         return redirect('clinical:record_consultation', visit_pk=existing_visit.pk)
 
-    # Open the visit now and mark the appointment as attended
     visit = Visit.objects.create(
         patient=appt.patient,
         doctor=appt.doctor,
@@ -110,6 +105,39 @@ def start_consultation(request, pk):
     appt.save()
     messages.success(request, f"Visit opened for {appt.patient.full_name}. Record the consultation now.")
     return redirect('clinical:record_consultation', visit_pk=visit.pk)
+
+@login_required
+def open_emergency_visit(request, patient_pk):
+    """
+    Doctor-initiated emergency walk-in visit for a patient with NO appointment.
+    Creates an OPEN visit (appointment = None) and jumps straight to the consultation form.
+    """
+    if request.user.role != 'DOCTOR':
+        messages.error(request, "Access denied. Only doctors can open emergency visits.")
+        return redirect('users:dashboard')
+
+    patient = get_object_or_404(PatientProfile, pk=patient_pk)
+
+    if request.method == 'POST':
+        existing_open = Visit.objects.filter(patient=patient, status='OPEN').select_related('doctor').first()
+        if existing_open:
+            if existing_open.doctor == request.user:
+                messages.info(request, f"{patient.full_name} already has an open visit under your care. Continuing to it.")
+                return redirect('clinical:record_consultation', visit_pk=existing_open.pk)
+            messages.warning(request, f"{patient.full_name} already has an open visit under Dr. {existing_open.doctor.username}.")
+            return redirect('appointments:visit_detail', pk=existing_open.pk)
+
+        visit = Visit.objects.create(
+            patient=patient,
+            doctor=request.user,
+            appointment=None,
+            status='OPEN'
+        )
+        messages.success(request, f"EMERGENCY visit opened for {patient.full_name}. Record the consultation now.")
+        return redirect('clinical:record_consultation', visit_pk=visit.pk)
+
+    messages.error(request, "Invalid request.")
+    return redirect('patients:patient_detail', pk=patient.pk)
 
 @login_required
 def check_in(request, pk):
