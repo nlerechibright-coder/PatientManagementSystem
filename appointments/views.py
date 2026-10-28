@@ -33,13 +33,54 @@ def appointment_detail(request, pk):
     return render(request, 'appointments/appointment_detail.html', {'appointment': appt})
 
 @login_required
+def accept_appointment(request, pk):
+    if request.user.role != 'DOCTOR':
+        messages.error(request, "Access denied. Only doctors can accept appointments.")
+        return redirect('users:dashboard')
+
+    appt = get_object_or_404(Appointment, pk=pk)
+
+    if appt.doctor != request.user:
+        messages.error(request, "Access denied. This appointment is assigned to another doctor.")
+        return redirect('users:doctor_dashboard')
+
+    if request.method == 'POST':
+        if appt.status == 'PENDING':
+            appt.status = 'CONFIRMED'
+            appt.save()
+            messages.success(request, f"Appointment for {appt.patient.full_name} on {appt.date} at {appt.time} CONFIRMED.")
+        else:
+            messages.warning(request, "Only pending appointments can be accepted.")
+    return redirect('users:doctor_dashboard')
+
+@login_required
+def reject_appointment(request, pk):
+    if request.user.role != 'DOCTOR':
+        messages.error(request, "Access denied. Only doctors can reject appointments.")
+        return redirect('users:dashboard')
+
+    appt = get_object_or_404(Appointment, pk=pk)
+
+    if appt.doctor != request.user:
+        messages.error(request, "Access denied. This appointment is assigned to another doctor.")
+        return redirect('users:doctor_dashboard')
+
+    if request.method == 'POST':
+        if appt.status == 'PENDING':
+            appt.status = 'CANCELLED'
+            appt.save()
+            messages.warning(request, f"Appointment for {appt.patient.full_name} on {appt.date} REJECTED/CANCELLED.")
+        else:
+            messages.warning(request, "Only pending appointments can be rejected.")
+    return redirect('users:doctor_dashboard')
+
+@login_required
 def check_in(request, pk):
     if request.user.role not in ['ADMIN', 'RECEPTIONIST']:
         messages.error(request, "Access denied.")
         return redirect('users:dashboard')
 
     appt = get_object_or_404(Appointment, pk=pk)
-    
     if appt.status == 'CANCELLED':
         messages.error(request, "Cannot check in a cancelled appointment.")
         return redirect('appointments:appointment_detail', pk=appt.pk)
@@ -53,7 +94,6 @@ def check_in(request, pk):
         )
         appt.status = 'COMPLETED'
         appt.save()
-        
         messages.success(request, f"Patient {appt.patient.full_name} checked in successfully. Visit #{visit.pk} is now OPEN.")
         return redirect('appointments:visit_detail', pk=visit.pk)
 
@@ -63,11 +103,8 @@ def check_in(request, pk):
 def visit_detail(request, pk):
     visit = get_object_or_404(
         Visit.objects.select_related(
-            'patient', 
-            'doctor',
-            'consultation',
-            'consultation__entered_by',
-            'consultation__verified_by'
+            'patient', 'doctor', 'consultation',
+            'consultation__entered_by', 'consultation__verified_by'
         ).prefetch_related(
             'consultation__vital_signs',
             'consultation__prescriptions',

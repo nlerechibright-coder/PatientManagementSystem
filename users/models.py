@@ -17,6 +17,8 @@ class DoctorProfile(models.Model):
     specialization = models.CharField(max_length=100)
     license_number = models.CharField(max_length=50, unique=True)
     bio = models.TextField(blank=True)
+    is_available = models.BooleanField(default=True, verbose_name="Active (On Duty)")
 
     def __str__(self):
-        return f"Dr. {self.user.username} - {self.specialization}"
+        status = "On Duty" if self.is_available else "Off Duty"
+        return f"Dr. {self.user.username} - {self.specialization} [{status}]"

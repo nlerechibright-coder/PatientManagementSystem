@@ -11,6 +11,7 @@ urlpatterns = [
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('create-doctor/', views.create_doctor, name='create_doctor'),
     path('create-receptionist/', views.create_receptionist, name='create_receptionist'),
+    path('toggle-availability/', views.toggle_availability, name='toggle_availability'),
     path('receptionist-dashboard/', views.receptionist_dashboard, name='receptionist_dashboard'),
     path('doctor-dashboard/', views.doctor_dashboard, name='doctor_dashboard'),
     path('patient-dashboard/', views.patient_dashboard, name='patient_dashboard'),

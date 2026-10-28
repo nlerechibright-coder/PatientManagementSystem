@@ -6,10 +6,23 @@
     <div class="mb-8">
         <a href="{% url 'patients:patient_list' %}" class="text-sm text-blue-600 hover:text-blue-800 mb-2 inline-flex items-center gap-1">&larr; Back to Directory</a>
         <h1 class="text-3xl font-bold text-slate-900">Schedule Appointment</h1>
-        <p class="text-slate-500 mt-1">Assign a patient to a doctor for a specific date and time.</p>
+        <p class="text-slate-500 mt-1">Assign a patient to an <strong>Active (On Duty)</strong> doctor for a specific date and time.</p>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+        {% if form.errors %}
+        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+            <p class="font-bold mb-2">Please correct the following:</p>
+            <ul class="list-disc list-inside text-sm space-y-1">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         <form method="post" class="space-y-6">
             {% csrf_token %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -18,7 +31,7 @@
                     {{ form.patient }}
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Doctor *</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Doctor * (status shown in list)</label>
                     {{ form.doctor }}
                 </div>
                 <div>
