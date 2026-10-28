@@ -7,7 +7,11 @@
         <h1 class="text-3xl font-bold text-slate-900">Doctor Dashboard</h1>
         <p class="text-slate-500 mt-1">Welcome, Dr. {{ user.username }}. Here is your clinical queue.</p>
     </div>
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 flex-wrap">
+        <a href="{% url 'patients:patient_list' %}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            Patient Directory (Emergency Search)
+        </a>
         {% if user.doctor_profile.is_available %}
             <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800 border border-green-200">
                 <span class="w-2 h-2 rounded-full bg-green-500"></span> ACTIVE — On Duty
@@ -89,12 +93,12 @@
         </div>
     </div>
 
-    <!-- Upcoming Appointments with Accept / Reject -->
+    <!-- Upcoming Appointments: Accept / Reject / Attend Now -->
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-2">
         <div class="px-6 py-4 border-b border-slate-200 bg-blue-50 flex justify-between items-center">
             <h3 class="text-lg font-semibold text-blue-900 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                Upcoming Appointments (Accept / Reject)
+                My Schedule (Accept / Reject / Attend Now)
             </h3>
             <span class="bg-blue-200 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">{{ appointments|length }}</span>
         </div>
@@ -115,8 +119,9 @@
                         {{ appt.status }}
                     </span>
                 </div>
-                {% if appt.status == 'PENDING' %}
-                <div class="mt-4 flex gap-3 justify-end">
+                {% if appt.status == 'PENDING' or appt.status == 'CONFIRMED' %}
+                <div class="mt-4 flex gap-3 justify-end flex-wrap">
+                    {% if appt.status == 'PENDING' %}
                     <form method="post" action="{% url 'appointments:reject_appointment' appt.pk %}">
                         {% csrf_token %}
                         <button type="submit" class="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
@@ -127,6 +132,13 @@
                         {% csrf_token %}
                         <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-sm">
                             Accept
+                        </button>
+                    </form>
+                    {% endif %}
+                    <form method="post" action="{% url 'appointments:start_consultation' appt.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                            Attend Now (Start Consultation)
                         </button>
                     </form>
                 </div>

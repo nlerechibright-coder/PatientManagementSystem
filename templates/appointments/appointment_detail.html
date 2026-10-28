@@ -54,14 +54,25 @@
             </div>
         </div>
 
-        {% if appointment.status == 'PENDING' or appointment.status == 'CONFIRMED' %}
-        <div class="mt-8 pt-6 border-t border-slate-200 flex justify-end">
-            <a href="{% url 'appointments:check_in' appointment.pk %}" class="px-6 py-3 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-sm flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Check In Patient
-            </a>
+        <div class="mt-8 pt-6 border-t border-slate-200 flex justify-end gap-3 flex-wrap">
+            {% if user.role == 'DOCTOR' and user == appointment.doctor and appointment.status != 'CANCELLED' and appointment.status != 'COMPLETED' %}
+                <form method="post" action="{% url 'appointments:start_consultation' appointment.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                        Attend Now (Start Consultation Early / Emergency)
+                    </button>
+                </form>
+            {% endif %}
+
+            {% if user.role == 'ADMIN' or user.role == 'RECEPTIONIST' %}
+                {% if appointment.status == 'PENDING' or appointment.status == 'CONFIRMED' %}
+                    <a href="{% url 'appointments:check_in' appointment.pk %}" class="px-6 py-3 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Check In Patient
+                    </a>
+                {% endif %}
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

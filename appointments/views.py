@@ -75,6 +75,43 @@ def reject_appointment(request, pk):
     return redirect('users:doctor_dashboard')
 
 @login_required
+def start_consultation(request, pk):
+    """
+    Doctor attends to a scheduled patient IMMEDIATELY, before the scheduled time.
+    Used for emergencies or when the doctor is less busy. Bypasses receptionist check-in.
+    """
+    if request.user.role != 'DOCTOR':
+        messages.error(request, "Access denied. Only doctors can start consultations.")
+        return redirect('users:dashboard')
+
+    appt = get_object_or_404(Appointment, pk=pk)
+
+    if appt.doctor != request.user:
+        messages.error(request, "Access denied. This appointment is assigned to another doctor.")
+        return redirect('users:doctor_dashboard')
+
+    if appt.status not in ['PENDING', 'CONFIRMED']:
+        messages.warning(request, "This appointment cannot be attended (it is already completed or cancelled).")
+        return redirect('users:doctor_dashboard')
+
+    # If a visit already exists for this appointment, go straight to it
+    existing_visit = Visit.objects.filter(appointment=appt).first()
+    if existing_visit:
+        return redirect('clinical:record_consultation', visit_pk=existing_visit.pk)
+
+    # Open the visit now and mark the appointment as attended
+    visit = Visit.objects.create(
+        patient=appt.patient,
+        doctor=appt.doctor,
+        appointment=appt,
+        status='OPEN'
+    )
+    appt.status = 'COMPLETED'
+    appt.save()
+    messages.success(request, f"Visit opened for {appt.patient.full_name}. Record the consultation now.")
+    return redirect('clinical:record_consultation', visit_pk=visit.pk)
+
+@login_required
 def check_in(request, pk):
     if request.user.role not in ['ADMIN', 'RECEPTIONIST']:
         messages.error(request, "Access denied.")
@@ -86,6 +123,11 @@ def check_in(request, pk):
         return redirect('appointments:appointment_detail', pk=appt.pk)
 
     if request.method == 'POST':
+        existing_visit = Visit.objects.filter(appointment=appt).first()
+        if existing_visit:
+            messages.warning(request, "This appointment already has an open visit.")
+            return redirect('appointments:visit_detail', pk=existing_visit.pk)
+
         visit = Visit.objects.create(
             patient=appt.patient,
             doctor=appt.doctor,
