@@ -1,0 +1,25 @@
+{% extends 'users/base.html' %}
+{% block title %}Confirm Check-In - MediCore{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-slate-900">Confirm Patient Check-In</h1>
+        <p class="text-slate-500 mt-2">You are about to open a clinical visit for this patient.</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
+        <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <h3 class="text-xl font-semibold text-slate-900 mb-2">{{ appointment.patient.full_name }}</h3>
+        <p class="text-slate-500 mb-6">ID: {{ appointment.patient.patient_id }} | Doctor: Dr. {{ appointment.doctor.username }}</p>
+
+        <form method="post" class="flex justify-center gap-4">
+            {% csrf_token %}
+            <a href="{% url 'appointments:appointment_detail' appointment.pk %}" class="px-6 py-3 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Cancel</a>
+            <button type="submit" class="px-6 py-3 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-sm">Confirm Check-In</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

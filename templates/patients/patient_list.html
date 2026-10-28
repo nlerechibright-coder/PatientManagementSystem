@@ -1,0 +1,70 @@
+{% extends 'users/base.html' %}
+{% block title %}Patient Directory - MediCore{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-900">Patient Directory</h1>
+        <p class="text-slate-500 mt-1">Search and retrieve patient files by name, ID, or phone number.</p>
+    </div>
+    <a href="{% url 'patients:register_patient' %}" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2 w-fit">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Register New Patient
+    </a>
+</div>
+
+<!-- Search Bar -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
+    <form method="get" class="flex gap-4">
+        <div class="relative flex-grow">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by Patient Name (e.g. John Doe), ID, or Phone..." 
+                class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-slate-900">
+        </div>
+        <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-slate-800 rounded-lg hover:bg-slate-900 transition-colors">Search</button>
+        {% if query %}
+        <a href="{% url 'patients:patient_list' %}" class="px-6 py-2.5 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Patient Table -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                    <th class="px-6 py-4 font-semibold">Full Name</th>
+                    <th class="px-6 py-4 font-semibold">Patient ID</th>
+                    <th class="px-6 py-4 font-semibold">Gender</th>
+                    <th class="px-6 py-4 font-semibold">Blood Group</th>
+                    <th class="px-6 py-4 font-semibold">Phone</th>
+                    <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for profile in patients %}
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ profile.first_name }} {{ profile.last_name }}</td>
+                    <td class="px-6 py-4 text-sm font-mono text-blue-600">{{ profile.patient_id }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-600">{{ profile.get_gender_display }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-600">{{ profile.blood_group|default:"-" }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-600">{{ profile.phone_number|default:"-" }}</td>
+                    <td class="px-6 py-4 text-right">
+                        <a href="{% url 'patients:patient_detail' profile.pk %}" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">View File &rarr;</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center text-sm text-slate-500">
+                        No patients found matching your search.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

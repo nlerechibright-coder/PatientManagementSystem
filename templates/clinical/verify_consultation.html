@@ -1,0 +1,43 @@
+{% extends 'users/base.html' %}
+{% block title %}Verify Consultation - MediCore{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+        <a href="{% url 'appointments:visit_detail' consultation.visit.pk %}" class="text-sm text-blue-600 hover:text-blue-800 mb-2 inline-flex items-center gap-1">&larr; Back to Visit</a>
+        <h1 class="text-3xl font-bold text-slate-900">Review & Verify Consultation</h1>
+        <p class="text-slate-500 mt-1">Patient: {{ consultation.visit.patient.full_name }}</p>
+        
+        <div class="mt-4 flex gap-3">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800">
+                Status: {{ consultation.get_verification_status_display }}
+            </span>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-800">
+                Entered by: {{ consultation.entered_by.username }} on {{ consultation.created_at|date:"M d, Y H:i" }}
+            </span>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-slate-200">
+            <div><h4 class="text-sm font-semibold text-slate-500 uppercase">Blood Pressure</h4><p class="text-lg font-medium">{% if consultation.vital_signs %}{{ consultation.vital_signs.blood_pressure }}{% else %}-{% endif %}</p></div>
+            <div><h4 class="text-sm font-semibold text-slate-500 uppercase">Temperature</h4><p class="text-lg font-medium">{% if consultation.vital_signs %}{{ consultation.vital_signs.temperature }} °C{% else %}-{% endif %}</p></div>
+            <div><h4 class="text-sm font-semibold text-slate-500 uppercase">Pulse</h4><p class="text-lg font-medium">{% if consultation.vital_signs %}{{ consultation.vital_signs.pulse }} bpm{% else %}-{% endif %}</p></div>
+            <div><h4 class="text-sm font-semibold text-slate-500 uppercase">Weight</h4><p class="text-lg font-medium">{% if consultation.vital_signs %}{{ consultation.vital_signs.weight }} kg{% else %}-{% endif %}</p></div>
+        </div>
+
+        <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">Chief Complaint</h4><p class="text-slate-900 whitespace-pre-line">{{ consultation.chief_complaint }}</p></div>
+        <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">History of Present Illness</h4><p class="text-slate-900 whitespace-pre-line">{{ consultation.history_of_present_illness }}</p></div>
+        <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">Examination Findings</h4><p class="text-slate-900 whitespace-pre-line">{{ consultation.examination_findings }}</p></div>
+        <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">Diagnosis</h4><p class="text-slate-900 whitespace-pre-line">{{ consultation.diagnosis }}</p></div>
+        <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">Treatment Plan</h4><p class="text-slate-900 whitespace-pre-line">{{ consultation.treatment_plan }}</p></div>
+        <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">Follow-up Instructions</h4><p class="text-slate-900 whitespace-pre-line">{{ consultation.follow_up_instructions }}</p></div>
+    </div>
+
+    <form method="post" class="flex justify-end gap-4">
+        {% csrf_token %}
+        <button type="submit" name="action" value="request_correction" class="px-6 py-3 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors">Request Correction</button>
+        <button type="submit" name="action" value="verify" class="px-6 py-3 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-sm">Verify & Approve</button>
+    </form>
+</div>
+{% endblock %}

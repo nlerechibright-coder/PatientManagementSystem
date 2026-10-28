@@ -1,0 +1,64 @@
+{% extends 'users/base.html' %}
+{% block title %}Create Doctor Account - MediCore{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="mb-8">
+        <a href="{% url 'users:admin_dashboard' %}" class="text-sm text-blue-600 hover:text-blue-800 mb-2 inline-flex items-center gap-1">&larr; Back to Dashboard</a>
+        <h1 class="text-3xl font-bold text-slate-900">Create Doctor Account</h1>
+        <p class="text-slate-500 mt-1">Register a new doctor and assign their clinical specialty.</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <h3 class="text-lg font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Login Credentials</h3>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Username *</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}<p class="text-red-500 text-xs mt-1">{{ form.username.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
+                    {{ form.email }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Password *</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}<p class="text-red-500 text-xs mt-1">{{ form.password1.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Confirm Password *</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}<p class="text-red-500 text-xs mt-1">{{ form.password2.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="md:col-span-2 mt-4">
+                    <h3 class="text-lg font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Professional Details</h3>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Specialization *</label>
+                    {{ form.specialization }}
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Medical License Number *</label>
+                    {{ form.license_number }}
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Biography (Optional)</label>
+                    {{ form.bio }}
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-4 pt-6 border-t border-slate-200">
+                <a href="{% url 'users:admin_dashboard' %}" class="px-6 py-3 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Cancel</a>
+                <button type="submit" class="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Create Doctor Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

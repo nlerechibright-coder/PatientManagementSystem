@@ -1,0 +1,67 @@
+{% extends 'users/base.html' %}
+{% block title %}Appointment Details - MediCore{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+        <a href="{% url 'patients:patient_detail' appointment.patient.pk %}" class="text-sm text-blue-600 hover:text-blue-800 mb-2 inline-flex items-center gap-1">&larr; Back to Patient File</a>
+        <h1 class="text-3xl font-bold text-slate-900">Appointment Details</h1>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Patient Information</h3>
+                <dl class="space-y-4">
+                    <div>
+                        <dt class="text-xs text-slate-400">Name</dt>
+                        <dd class="text-lg font-medium text-slate-900 mt-1">{{ appointment.patient.full_name }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-slate-400">Patient ID</dt>
+                        <dd class="text-sm font-mono text-blue-600 mt-1">{{ appointment.patient.patient_id }}</dd>
+                    </div>
+                </dl>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Appointment Details</h3>
+                <dl class="space-y-4">
+                    <div>
+                        <dt class="text-xs text-slate-400">Doctor</dt>
+                        <dd class="text-lg font-medium text-slate-900 mt-1">Dr. {{ appointment.doctor.username }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-slate-400">Date & Time</dt>
+                        <dd class="text-sm font-medium text-slate-900 mt-1">{{ appointment.date }} at {{ appointment.time }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-slate-400">Reason</dt>
+                        <dd class="text-sm font-medium text-slate-900 mt-1">{{ appointment.reason }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-slate-400">Status</dt>
+                        <dd class="mt-1">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                {% if appointment.status == 'PENDING' %}bg-amber-100 text-amber-800
+                                {% elif appointment.status == 'CONFIRMED' %}bg-green-100 text-green-800
+                                {% elif appointment.status == 'CANCELLED' %}bg-red-100 text-red-800
+                                {% else %}bg-slate-100 text-slate-800{% endif %}">
+                                {{ appointment.status }}
+                            </span>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        {% if appointment.status == 'PENDING' or appointment.status == 'CONFIRMED' %}
+        <div class="mt-8 pt-6 border-t border-slate-200 flex justify-end">
+            <a href="{% url 'appointments:check_in' appointment.pk %}" class="px-6 py-3 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Check In Patient
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

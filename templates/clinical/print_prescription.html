@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prescription - {{ visit.patient.full_name }}</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; margin: 0; padding: 40px; }
+        .header { border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .clinic-name { font-size: 24px; font-weight: bold; color: #2563eb; }
+        .clinic-details { font-size: 12px; color: #666; text-align: right; }
+        .patient-info { display: flex; justify-content: space-between; margin-bottom: 30px; background: #f8fafc; padding: 15px; border-radius: 8px; }
+        .info-block { flex: 1; }
+        .info-label { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 4px; }
+        .info-value { font-size: 14px; font-weight: 600; color: #0f172a; }
+        .rx-symbol { font-size: 48px; font-weight: bold; color: #2563eb; font-family: serif; margin-bottom: 10px; }
+        .medication-list { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .medication-list th { text-align: left; border-bottom: 2px solid #e2e8f0; padding: 10px; font-size: 12px; text-transform: uppercase; color: #64748b; }
+        .medication-list td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .footer { margin-top: 60px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .signature-line { border-top: 1px solid #333; width: 200px; padding-top: 5px; text-align: center; font-size: 12px; }
+        .disclaimer { font-size: 10px; color: #94a3b8; margin-top: 40px; text-align: center; border-top: 1px dashed #cbd5e1; padding-top: 10px; }
+        
+        /* Print Specific Styles */
+        @media print {
+            body { padding: 20px; }
+            .no-print { display: none !important; }
+            .header { border-bottom-color: #000; }
+            .clinic-name { color: #000; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+        <button onclick="window.print()" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">️ Print Prescription</button>
+        <a href="{% url 'appointments:visit_detail' visit.pk %}" style="margin-left: 10px; color: #64748b; text-decoration: none;">&larr; Back to Visit</a>
+    </div>
+
+    <div class="header">
+        <div class="clinic-name">MediCore Hospital</div>
+        <div class="clinic-details">
+            123 Medical Drive, Health City<br>
+            Phone: (555) 123-4567 | Email: contact@medicore.com
+        </div>
+    </div>
+
+    <div class="patient-info">
+        <div class="info-block">
+            <div class="info-label">Patient Name</div>
+            <div class="info-value">{{ visit.patient.full_name }}</div>
+        </div>
+        <div class="info-block">
+            <div class="info-label">Patient ID</div>
+            <div class="info-value">{{ visit.patient.patient_id }}</div>
+        </div>
+        <div class="info-block">
+            <div class="info-label">Date of Visit</div>
+            <div class="info-value">{{ visit.check_in_time|date:"F d, Y" }}</div>
+        </div>
+        <div class="info-block">
+            <div class="info-label">Attending Doctor</div>
+            <div class="info-value">Dr. {{ visit.doctor.username }}</div>
+        </div>
+    </div>
+
+    {% if visit.consultation %}
+    <div class="rx-symbol">Rx</div>
+    
+    <table class="medication-list">
+        <thead>
+            <tr>
+                <th style="width: 30%;">Medication</th>
+                <th style="width: 20%;">Dosage</th>
+                <th style="width: 25%;">Frequency</th>
+                <th style="width: 15%;">Duration</th>
+                <th style="width: 10%;">Instructions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rx in visit.consultation.prescriptions.all %}
+                {% for item in rx.items.all %}
+                <tr>
+                    <td><strong>{{ item.medicine_name }}</strong></td>
+                    <td>{{ item.dosage }}</td>
+                    <td>{{ item.frequency }}</td>
+                    <td>{{ item.duration }}</td>
+                    <td>{{ item.instructions|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #94a3b8; padding: 20px;">No medications prescribed for this visit.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if visit.consultation.follow_up_instructions %}
+    <div style="margin-top: 30px; background: #f0f9ff; padding: 15px; border-left: 4px solid #2563eb; border-radius: 4px;">
+        <div class="info-label" style="color: #2563eb;">Follow-Up Instructions</div>
+        <div style="font-size: 14px; margin-top: 5px; white-space: pre-line;">{{ visit.consultation.follow_up_instructions }}</div>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <div class="info-block">
+            <div class="info-label">Diagnosis</div>
+            <div class="info-value" style="font-weight: normal; font-size: 14px;">{{ visit.consultation.diagnosis }}</div>
+        </div>
+        <div class="signature-line">
+            Dr. {{ visit.doctor.username }}<br>
+            <span style="font-size: 10px; color: #666;">Signature & Stamp</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="disclaimer">
+        This prescription is valid only with the doctor's signature and hospital stamp. Please follow the prescribed dosage strictly.
+    </div>
+</body>
+</html>

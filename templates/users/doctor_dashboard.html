@@ -1,0 +1,99 @@
+{% extends 'users/base.html' %}
+{% block title %}Doctor Dashboard - MediCore{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-slate-900">Doctor Dashboard</h1>
+    <p class="text-slate-500 mt-1">Welcome, Dr. {{ user.username }}. Here is your clinical queue.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Consultations Awaiting Verification -->
+    <div class="lg:col-span-3 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-4">
+        <div class="px-6 py-4 border-b border-slate-200 bg-amber-50 flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-amber-900 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Transcriptions Awaiting Your Verification
+            </h3>
+        </div>
+        <div class="divide-y divide-slate-100">
+            {% for consultation in pending_verifications %}
+            <div class="p-6 hover:bg-slate-50 transition-colors flex justify-between items-center">
+                <div>
+                    <p class="text-lg font-semibold text-slate-900">{{ consultation.visit.patient.full_name }}</p>
+                    <p class="text-sm text-slate-500">ID: {{ consultation.visit.patient.patient_id }} &bull; Entered by: {{ consultation.entered_by.username }} on {{ consultation.created_at|date:"M d, H:i" }}</p>
+                </div>
+                <a href="{% url 'clinical:verify_consultation' consultation.pk %}" class="px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors shadow-sm">
+                    Review & Verify
+                </a>
+            </div>
+            {% empty %}
+            <div class="p-8 text-center text-slate-500">
+                <p>No transcriptions awaiting your verification.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Active Visits (Patients Waiting) -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 bg-green-50 flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-green-900 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Patients Waiting (Open Visits)
+            </h3>
+            <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">{{ visits|length }}</span>
+        </div>
+        <div class="divide-y divide-slate-100">
+            {% for visit in visits %}
+            <div class="p-6 hover:bg-slate-50 transition-colors flex justify-between items-center">
+                <div>
+                    <p class="text-lg font-semibold text-slate-900">{{ visit.patient.full_name }}</p>
+                    <p class="text-sm text-slate-500">ID: {{ visit.patient.patient_id }} &bull; Checked in: {{ visit.check_in_time|time:"h:i A" }}</p>
+                </div>
+                <a href="{% url 'appointments:visit_detail' visit.pk %}" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                    Open File
+                </a>
+            </div>
+            {% empty %}
+            <div class="p-8 text-center text-slate-500">
+                <p>No patients currently waiting.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-2">
+        <div class="px-6 py-4 border-b border-slate-200 bg-blue-50 flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-blue-900 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Upcoming Appointments
+            </h3>
+            <span class="bg-blue-200 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">{{ appointments|length }}</span>
+        </div>
+        <div class="divide-y divide-slate-100 max-h-96 overflow-y-auto">
+            {% for appt in appointments %}
+            <div class="p-6 hover:bg-slate-50 transition-colors flex justify-between items-center">
+                <div>
+                    <p class="text-lg font-semibold text-slate-900">{{ appt.patient.full_name }}</p>
+                    <p class="text-sm text-slate-500">ID: {{ appt.patient.patient_id }} &bull; {{ appt.date }} at {{ appt.time|time:"h:i A" }}</p>
+                </div>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                    {% if appt.status == 'PENDING' %}bg-amber-100 text-amber-800
+                    {% elif appt.status == 'CONFIRMED' %}bg-green-100 text-green-800
+                    {% else %}bg-slate-100 text-slate-800{% endif %}">
+                    {{ appt.status }}
+                </span>
+            </div>
+            {% empty %}
+            <div class="p-8 text-center text-slate-500">
+                <p>No upcoming appointments scheduled.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

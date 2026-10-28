@@ -1,0 +1,17 @@
+{% extends 'users/base.html' %}
+{% block title %}Patient Dashboard - MediCore{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-slate-900">Patient Portal</h1>
+    <p class="text-slate-500 mt-1">Welcome, {{ user.username }}. Manage your health records here.</p>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
+    <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    </div>
+    <h3 class="text-lg font-semibold text-slate-900 mb-2">Patient Portal</h3>
+    <p class="text-slate-500 max-w-md mx-auto">Your appointment history, medical records, and prescription viewer are currently being configured. Check back soon.</p>
+</div>
+{% endblock %}

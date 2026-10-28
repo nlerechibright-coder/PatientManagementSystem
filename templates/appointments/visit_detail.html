@@ -1,0 +1,117 @@
+{% extends 'users/base.html' %}
+{% block title %}Visit Details - MediCore{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="mb-8">
+        <a href="{% url 'patients:patient_detail' visit.patient.pk %}" class="text-sm text-blue-600 hover:text-blue-800 mb-2 inline-flex items-center gap-1">&larr; Back to Patient File</a>
+        <h1 class="text-3xl font-bold text-slate-900">Visit Details</h1>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-6">
+        <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-200">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900">{{ visit.patient.full_name }}</h2>
+                <p class="text-sm text-slate-500">ID: {{ visit.patient.patient_id }}</p>
+            </div>
+            <div class="text-right">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                    {% if visit.status == 'OPEN' %}bg-green-100 text-green-800{% else %}bg-slate-100 text-slate-800{% endif %}">
+                    {{ visit.status }}
+                </span>
+                <p class="text-xs text-slate-400 mt-1">Checked in: {{ visit.check_in_time|date:"M d, Y H:i" }}</p>
+            </div>
+        </div>
+
+        {% if visit.consultation %}
+        <div class="space-y-6">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+                <h3 class="text-lg font-semibold text-slate-900">Clinical Documentation</h3>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                    {% if visit.consultation.verification_status == 'VERIFIED' %}bg-green-100 text-green-800
+                    {% elif visit.consultation.verification_status == 'AWAITING_VERIFICATION' %}bg-amber-100 text-amber-800
+                    {% elif visit.consultation.verification_status == 'CORRECTION_REQUESTED' %}bg-red-100 text-red-800
+                    {% else %}bg-slate-100 text-slate-800{% endif %}">
+                    {{ visit.consultation.get_verification_status_display }}
+                </span>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <div><p class="text-xs text-slate-500 uppercase font-semibold">Blood Pressure</p><p class="font-semibold text-slate-900 mt-1">{% if visit.consultation.vital_signs %}{{ visit.consultation.vital_signs.blood_pressure }}{% else %}-{% endif %}</p></div>
+                <div><p class="text-xs text-slate-500 uppercase font-semibold">Temperature</p><p class="font-semibold text-slate-900 mt-1">{% if visit.consultation.vital_signs and visit.consultation.vital_signs.temperature %}{{ visit.consultation.vital_signs.temperature }} °C{% else %}-{% endif %}</p></div>
+                <div><p class="text-xs text-slate-500 uppercase font-semibold">Pulse</p><p class="font-semibold text-slate-900 mt-1">{% if visit.consultation.vital_signs and visit.consultation.vital_signs.pulse %}{{ visit.consultation.vital_signs.pulse }} bpm{% else %}-{% endif %}</p></div>
+                <div><p class="text-xs text-slate-500 uppercase font-semibold">Weight</p><p class="font-semibold text-slate-900 mt-1">{% if visit.consultation.vital_signs and visit.consultation.vital_signs.weight %}{{ visit.consultation.vital_signs.weight }} kg{% else %}-{% endif %}</p></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">Chief Complaint</h4><p class="text-sm text-slate-900 whitespace-pre-line bg-slate-50 p-3 rounded-lg border border-slate-200">{{ visit.consultation.chief_complaint|default:"Not recorded" }}</p></div>
+                <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">Diagnosis</h4><p class="text-sm text-slate-900 whitespace-pre-line bg-slate-50 p-3 rounded-lg border border-slate-200 font-medium">{{ visit.consultation.diagnosis|default:"Not recorded" }}</p></div>
+            </div>
+            <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">History of Present Illness</h4><p class="text-sm text-slate-900 whitespace-pre-line bg-slate-50 p-3 rounded-lg border border-slate-200">{{ visit.consultation.history_of_present_illness|default:"Not recorded" }}</p></div>
+            <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">Examination Findings</h4><p class="text-sm text-slate-900 whitespace-pre-line bg-slate-50 p-3 rounded-lg border border-slate-200">{{ visit.consultation.examination_findings|default:"Not recorded" }}</p></div>
+            <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">Treatment Plan</h4><p class="text-sm text-slate-900 whitespace-pre-line bg-slate-50 p-3 rounded-lg border border-slate-200">{{ visit.consultation.treatment_plan|default:"Not recorded" }}</p></div>
+
+            {% if visit.consultation.follow_up_instructions %}
+            <div><h4 class="text-sm font-semibold text-slate-500 uppercase mb-2">Follow-up Instructions</h4><p class="text-sm text-slate-900 whitespace-pre-line bg-slate-50 p-3 rounded-lg border border-slate-200">{{ visit.consultation.follow_up_instructions }}</p></div>
+            {% endif %}
+
+            {% if visit.consultation.prescriptions.all %}
+            <div class="mt-6">
+                <h4 class="text-sm font-semibold text-slate-500 uppercase mb-3">Prescriptions</h4>
+                {% for rx in visit.consultation.prescriptions.all %}
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
+                    {% if rx.notes %}<p class="text-sm font-semibold text-blue-900 mb-2">Notes: {{ rx.notes }}</p>{% endif %}
+                    <ul class="space-y-2">
+                        {% for item in rx.items.all %}
+                        <li class="text-sm text-blue-800 flex flex-col md:flex-row md:justify-between border-b border-blue-100 pb-2 last:border-0 last:pb-0">
+                            <span class="font-semibold">{{ item.medicine_name }}</span>
+                            <span class="text-blue-600">{{ item.dosage }} - {{ item.frequency }} for {{ item.duration }}</span>
+                        </li>
+                        {% if item.instructions %}<li class="text-xs text-blue-600 italic pl-4">"{{ item.instructions }}"</li>{% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="pt-4 border-t border-slate-200 text-xs text-slate-500 flex flex-col md:flex-row md:justify-between gap-2">
+                <span>Entered by: <strong>{{ visit.consultation.entered_by.username }}</strong> on {{ visit.consultation.created_at|date:"M d, Y H:i" }}</span>
+                {% if visit.consultation.verified_by %}<span>Verified by: <strong>{{ visit.consultation.verified_by.username }}</strong> on {{ visit.consultation.verified_at|date:"M d, Y H:i" }}</span>{% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-12 bg-slate-50 rounded-lg border border-slate-200 border-dashed">
+            <p class="text-slate-500 mb-4">No clinical documentation has been recorded for this visit yet.</p>
+        </div>
+        {% endif %}
+
+        <div class="mt-8 pt-6 border-t border-slate-200 flex flex-wrap gap-4 justify-end">
+            {% if visit.consultation and visit.consultation.verification_status == 'VERIFIED' %}
+                <a href="{% url 'appointments:print_prescription' visit.pk %}" target="_blank" class="px-6 py-3 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Print Prescription
+                </a>
+            {% endif %}
+
+            {% if user.role == 'DOCTOR' and user == visit.doctor %}
+                {% if not visit.consultation or visit.consultation.verification_status != 'VERIFIED' %}
+                    <a href="{% url 'clinical:record_consultation' visit.pk %}" class="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">{% if visit.consultation %}Edit Consultation{% else %}Record Consultation{% endif %}</a>
+                {% endif %}
+                {% if visit.consultation and visit.consultation.verification_status == 'AWAITING_VERIFICATION' %}
+                    <a href="{% url 'clinical:verify_consultation' visit.consultation.pk %}" class="px-6 py-3 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-sm">Review & Verify</a>
+                {% endif %}
+            {% elif user.role in 'ADMIN,RECEPTIONIST' %}
+                {% if not visit.consultation or visit.consultation.verification_status == 'DRAFT' or visit.consultation.verification_status == 'CORRECTION_REQUESTED' %}
+                    <a href="{% url 'clinical:transcribe_consultation' visit.pk %}" class="px-6 py-3 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors shadow-sm">Transcribe Doctor's Notes</a>
+                {% elif visit.consultation.verification_status == 'AWAITING_VERIFICATION' %}
+                    <span class="px-6 py-3 text-sm font-medium text-slate-500 bg-slate-100 rounded-lg cursor-not-allowed flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        Awaiting Doctor Verification
+                    </span>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
