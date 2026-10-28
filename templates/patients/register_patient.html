@@ -10,6 +10,20 @@
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+        <!-- Global Form Errors Display -->
+        {% if form.errors %}
+        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+            <p class="font-bold mb-2">Please correct the following errors:</p>
+            <ul class="list-disc list-inside text-sm space-y-1">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         <form method="post" class="space-y-6">
             {% csrf_token %}
             

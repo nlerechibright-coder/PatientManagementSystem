@@ -32,6 +32,10 @@ def register_patient(request):
             patient = form.save()
             messages.success(request, f"Patient '{patient.first_name} {patient.last_name}' registered successfully with ID: {patient.patient_id}")
             return redirect('patients:patient_detail', pk=patient.pk)
+        else:
+            # This will print the exact reason the form failed to your terminal
+            print("REGISTRATION FORM ERRORS:", form.errors)
+            messages.error(request, "Please correct the errors highlighted in the form.")
     else:
         form = PatientProfileForm()
 
